@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
-SUBDIRS += MapGraphics \
+SUBDIRS += \
+    MapGraphics \
     TestApp
 
 TestApp.depends += MapGraphics

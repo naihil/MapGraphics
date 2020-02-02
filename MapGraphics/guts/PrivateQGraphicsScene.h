@@ -14,14 +14,10 @@
 class PrivateQGraphicsScene : public QGraphicsScene
 {
     Q_OBJECT
+
 public:
-    explicit PrivateQGraphicsScene(MapGraphicsScene * mgScene,
-                                   PrivateQGraphicsInfoSource * infoSource,
-                                   QObject *parent = 0);
-    
-signals:
-    
-public slots:
+    PrivateQGraphicsScene(MapGraphicsScene *mgScene, PrivateQGraphicsInfoSource *infoSource, QObject *parent = nullptr);
+    ~PrivateQGraphicsScene() override;
 
 private slots:
     void handleMGObjectAdded(MapGraphicsObject *);
@@ -31,15 +27,14 @@ private slots:
     void handleSelectionChanged();
 
 private:
-    void setMapGraphicsScene(MapGraphicsScene * mgScene);
+    void setMapGraphicsScene(MapGraphicsScene *mgScene);
 
     QPointer<MapGraphicsScene> _mgScene;
-    PrivateQGraphicsInfoSource * _infoSource;
+    PrivateQGraphicsInfoSource *_infoSource;
 
-    QHash<MapGraphicsObject *,PrivateQGraphicsObject *> _mgToqg;
+    QHash<MapGraphicsObject *, PrivateQGraphicsObject *> _mgToqg;
 
     QList<QGraphicsItem *> _oldSelections;
-    
 };
 
 #endif // PRIVATEQGRAPHICSSCENE_H

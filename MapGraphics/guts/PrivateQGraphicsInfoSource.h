@@ -19,9 +19,9 @@
 class PrivateQGraphicsInfoSource
 {
 public:
-    virtual quint8 zoomLevel() const=0;
+    virtual quint8 zoomLevel() const = 0;
 
-    virtual QSharedPointer<MapTileSource> tileSource() const=0;
+    virtual QSharedPointer<MapTileSource> tileSource() const = 0;
 };
 
 #endif // PRIVATEQGRAPHICSINFOSOURCE_H

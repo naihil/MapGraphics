@@ -4,206 +4,166 @@
 #include <QKeyEvent>
 #include <QTimer>
 
-MapGraphicsObject::MapGraphicsObject(bool sizeIsZoomInvariant, MapGraphicsObject *parent) :
-    _sizeIsZoomInvariant(sizeIsZoomInvariant), _constructed(false)
+MapGraphicsObject::MapGraphicsObject(bool sizeIsZoomInvariant, MapGraphicsObject *parent)
+    : QObject()
+    , _sizeIsZoomInvariant(sizeIsZoomInvariant)
 {
-    //Set default properties and the parent that was passed as argument
-    _enabled = true;
-    _opacity = 1.0;
     this->setParent(parent);
-    _pos = QPointF(0.0,0.0);
-    _rotation = 0.0;
-    _visible = true;
-    _zValue = 0.0;
-    _selected = false;
-
 
     /*
      * When we get back to the event loop, mark us as constructed.
      * This is a hack so that we can set properties of child objects in their constructors
     */
-    QTimer::singleShot(1, this, SLOT(setConstructed()));
+    QTimer::singleShot(1, this, &MapGraphicsObject::setConstructed);
 }
 
 MapGraphicsObject::~MapGraphicsObject()
 {
 }
 
-bool MapGraphicsObject::sizeIsZoomInvariant() const
-{
-    return _sizeIsZoomInvariant;
-}
-
 bool MapGraphicsObject::contains(const QPointF &geoPos) const
 {
-    QRectF geoRect = this->boundingRect();
-    return geoRect.contains(geoPos);
-}
-
-bool MapGraphicsObject::enabled() const
-{
-    return _enabled;
+    return this->boundingRect().contains(geoPos);
 }
 
 void MapGraphicsObject::setEnabled(bool nEnabled)
 {
     _enabled = nEnabled;
-    if (_constructed)
-        this->enabledChanged();
-    else
-        QTimer::singleShot(1, this, SIGNAL(enabledChanged()));
-}
-
-qreal MapGraphicsObject::opacity() const
-{
-    return _opacity;
+    if (_constructed) {
+        emit this->enabledChanged();
+    }
+    else {
+        QTimer::singleShot(1, this, &MapGraphicsObject::enabledChanged);
+    }
 }
 
 void MapGraphicsObject::setOpacity(qreal nOpacity)
 {
     _opacity = nOpacity;
-    if (_constructed)
-        this->opacityChanged();
-    else
+    if (_constructed) {
+        emit this->opacityChanged();
+    }
+    else {
         QTimer::singleShot(1, this, SIGNAL(opacityChanged()));
+    }
 }
 
-MapGraphicsObject *MapGraphicsObject::parent() const
-{
-    return _parent;
-}
-
-void MapGraphicsObject::setParent(MapGraphicsObject * nParent)
+void MapGraphicsObject::setParent(MapGraphicsObject *nParent)
 {
     _parent = nParent;
-    if (_constructed)
-        this->parentChanged();
-    else
-        QTimer::singleShot(1, this, SIGNAL(parentChanged()));
+    if (_constructed) {
+        emit this->parentChanged();
+    }
+    else {
+        QTimer::singleShot(1, this, &MapGraphicsObject::parentChanged);
+    }
 }
 
-const QPointF &MapGraphicsObject::pos() const
+void MapGraphicsObject::setPos(const QPointF &nPos)
 {
-    return _pos;
-}
-
-void MapGraphicsObject::setPos(const QPointF & nPos)
-{
-    if (nPos == _pos)
+    if (nPos == _pos) {
         return;
+    }
+
     _pos = nPos;
-
-    if (_constructed)
-        this->posChanged();
-    else
-        QTimer::singleShot(1, this, SIGNAL(posChanged()));
-}
-
-qreal MapGraphicsObject::rotation() const
-{
-    return _rotation;
+    if (_constructed) {
+        emit this->posChanged();
+    }
+    else {
+        QTimer::singleShot(1, this, &MapGraphicsObject::posChanged);
+    }
 }
 
 void MapGraphicsObject::setRotation(qreal nRotation)
 {
-    if (nRotation == _rotation)
+    if (qFuzzyCompare(nRotation, _rotation)) {
         return;
+    }
+
     _rotation = nRotation;
-
-    if (_constructed)
-        this->rotationChanged();
-    else
-        QTimer::singleShot(1, this, SIGNAL(rotationChanged()));
-}
-
-bool MapGraphicsObject::visible() const
-{
-    return _visible;
+    if (_constructed) {
+        emit this->rotationChanged();
+    }
+    else {
+        QTimer::singleShot(1, this, &MapGraphicsObject::rotationChanged);
+    }
 }
 
 void MapGraphicsObject::setVisible(bool nVisible)
 {
-    if (nVisible == _visible)
+    if (nVisible == _visible) {
         return;
+    }
+
     _visible = nVisible;
-
-    if (_constructed)
-        this->visibleChanged();
-    else
-        QTimer::singleShot(1, this, SIGNAL(visibleChanged()));
-}
-
-qreal MapGraphicsObject::longitude() const
-{
-    return _pos.x();
+    if (_constructed) {
+        emit this->visibleChanged();
+    }
+    else {
+        QTimer::singleShot(1, this, &MapGraphicsObject::visibleChanged);
+    }
 }
 
 void MapGraphicsObject::setLongitude(qreal nLongitude)
 {
-    this->setPos(QPointF(nLongitude,this->pos().y()));
-}
-
-qreal MapGraphicsObject::latitude() const
-{
-    return _pos.y();
+    this->setPos(QPointF(nLongitude, this->pos().y()));
 }
 
 void MapGraphicsObject::setLatitude(qreal nLatitude)
 {
-    this->setPos(QPointF(this->pos().x(),nLatitude));
-}
-
-qreal MapGraphicsObject::zValue() const
-{
-    return _zValue;
+    this->setPos(QPointF(this->pos().x(), nLatitude));
 }
 
 void MapGraphicsObject::setZValue(qreal nZValue)
 {
+    if (qFuzzyCompare(nZValue, _zValue)) {
+        return;
+    }
+
     _zValue = nZValue;
-
-    if (_constructed)
-        this->zValueChanged();
-    else
-        QTimer::singleShot(1, this, SIGNAL(zValueChanged()));
-}
-
-bool MapGraphicsObject::isSelected() const
-{
-    return _selected;
+    if (_constructed) {
+        emit this->zValueChanged();
+    }
+    else {
+        QTimer::singleShot(1, this, &MapGraphicsObject::zValueChanged);
+    }
 }
 
 void MapGraphicsObject::setSelected(bool sel)
 {
-    if (_selected == sel)
+    if (_selected == sel) {
         return;
+    }
+
     _selected = sel;
-
-    if (_constructed)
-        this->selectedChanged();
-    else
-        QTimer::singleShot(1, this, SIGNAL(selectedChanged()));
-}
-
-QString MapGraphicsObject::toolTip() const
-{
-    return _toolTip;
+    if (_constructed) {
+        emit this->selectedChanged();
+    }
+    else {
+        QTimer::singleShot(1, this, &MapGraphicsObject::selectedChanged);
+    }
 }
 
 void MapGraphicsObject::setToolTip(const QString &toolTip)
 {
+    if (_toolTip == toolTip) {
+        return;
+    }
+
     _toolTip = toolTip;
-    this->toolTipChanged(toolTip);
+    emit this->toolTipChanged(toolTip);
 }
 
 void MapGraphicsObject::setFlag(MapGraphicsObject::MapGraphicsObjectFlag flag, bool enabled)
 {
-    if (enabled)
+    if (enabled) {
         _flags = _flags | flag;
-    else
+    }
+    else {
         _flags = _flags & (~flag);
+    }
 
-    this->flagsChanged();
+    emit this->flagsChanged();
 }
 
 void MapGraphicsObject::setFlags(MapGraphicsObject::MapGraphicsObjectFlags flags)
@@ -216,13 +176,8 @@ void MapGraphicsObject::setFlags(MapGraphicsObject::MapGraphicsObjectFlags flags
         QTimer::singleShot(1, this, SIGNAL(flagsChanged()));
 }
 
-MapGraphicsObject::MapGraphicsObjectFlags MapGraphicsObject::flags() const
-{
-    return _flags;
-}
-
 //protected
-void MapGraphicsObject::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
+void MapGraphicsObject::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
     event->ignore();
 }
@@ -262,15 +217,16 @@ void MapGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void MapGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     //The default is to accept this if we are selectable and/or movable. Otherwise, ignore!
-    if (this->flags() & MapGraphicsObject::ObjectIsMovable
-            ||this->flags() & MapGraphicsObject::ObjectIsSelectable)
-    {
+    if (this->flags() & MapGraphicsObject::ObjectIsMovable ||
+            this->flags() & MapGraphicsObject::ObjectIsSelectable) {
         event->accept();
-        if (this->flags() & MapGraphicsObject::ObjectIsFocusable)
+        if (this->flags() & MapGraphicsObject::ObjectIsFocusable) {
             this->keyFocusRequested();
+        }
     }
-    else
+    else {
         event->ignore();
+    }
 }
 
 //protected
@@ -284,7 +240,6 @@ void MapGraphicsObject::wheelEvent(QGraphicsSceneWheelEvent *event)
 {
     event->ignore();
 }
-
 
 //private slot
 void MapGraphicsObject::setConstructed()

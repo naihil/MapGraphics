@@ -27,19 +27,19 @@ public:
     //PrivateQGraphicsObject will call some of our protected event handlers that nobody else needs to touch
     friend class PrivateQGraphicsObject;
 public:
-    explicit MapGraphicsObject(bool sizeIsZoomInvariant=false,MapGraphicsObject *parent = 0);
-    virtual ~MapGraphicsObject();
+    explicit MapGraphicsObject(bool sizeIsZoomInvariant = false, MapGraphicsObject *parent = nullptr);
+    ~MapGraphicsObject() override;
 
-    bool sizeIsZoomInvariant() const;
+    bool sizeIsZoomInvariant() const { return _sizeIsZoomInvariant; }
 
     /*!
      \brief You need to implement this. If sizeIsZoomInvariant() is true, this should return the size of the
      rectangle you want in PIXELS. If false, this should return the size of the rectangle in METERS. The
-     rectangle should be centered at (0,0) regardless.
+     rectangle should be centered at (0, 0) regardless.
 
      \return QRectF
     */
-    virtual QRectF boundingRect() const=0;
+    virtual QRectF boundingRect() const = 0;
 
     /*!
      \brief You can reimplement this if you want. Given a point in geographic coordinates (lat/lon),
@@ -49,7 +49,7 @@ public:
      \param geoPos
      \return bool
     */
-    virtual bool contains(const QPointF& geoPos) const;
+    virtual bool contains(const QPointF &geoPos) const;
 
     /**
      * @brief Paints the contents of the Object in ENU coordinates if the object is not zoom invariant.
@@ -61,57 +61,56 @@ public:
      * @param option
      * @param widget
      */
-    virtual void paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget=0)=0;
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) = 0;
 
-    bool enabled() const;
+    bool enabled() const { return _enabled; }
     void setEnabled(bool);
 
-    qreal opacity() const;
+    qreal opacity() const { return _opacity; }
     void setOpacity(qreal);
 
-    MapGraphicsObject * parent() const;
+    MapGraphicsObject *parent() const { return _parent; }
     void setParent(MapGraphicsObject *);
 
-    const QPointF& pos() const;
-    virtual void setPos(const QPointF&);
+    const QPointF &pos() const { return _pos; }
+    virtual void setPos(const QPointF &);
 
-    qreal rotation() const;
+    qreal rotation() const { return _rotation; }
     void setRotation(qreal);
 
-    bool visible() const;
+    bool visible() const { return _visible; }
     void setVisible(bool);
 
-    qreal longitude() const;
+    qreal longitude() const { return _pos.x(); }
     void setLongitude(qreal);
 
-    qreal latitude() const;
+    qreal latitude() const { return _pos.y(); }
     void setLatitude(qreal);
 
-    qreal zValue() const;
+    qreal zValue() const { return _zValue; }
     void setZValue(qreal);
 
-    bool isSelected() const;
+    bool isSelected() const { return _selected; }
     void setSelected(bool);
 
-    QString toolTip() const;
-    void setToolTip(const QString& toolTip);
+    QString toolTip() const { return _toolTip; }
+    void setToolTip(const QString &toolTip);
 
-    void setFlag(MapGraphicsObjectFlag, bool enabled=true);
+    MapGraphicsObject::MapGraphicsObjectFlags flags() const { return _flags; }
+    void setFlag(MapGraphicsObjectFlag, bool enabled = true);
     void setFlags(MapGraphicsObject::MapGraphicsObjectFlags);
-    MapGraphicsObject::MapGraphicsObjectFlags flags() const;
 
 protected:
-    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent * event);
-    virtual QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value);
-    virtual void keyPressEvent(QKeyEvent * event);
-    virtual void keyReleaseEvent(QKeyEvent * event);
-    virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event);
-    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent * event);
-    virtual void mousePressEvent(QGraphicsSceneMouseEvent * event);
-    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * event);
-    virtual void wheelEvent(QGraphicsSceneWheelEvent * event);
+    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+    virtual QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value);
+    virtual void keyPressEvent(QKeyEvent *event);
+    virtual void keyReleaseEvent(QKeyEvent *event);
+    virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+    virtual void wheelEvent(QGraphicsSceneWheelEvent *event);
 
-    
 signals:
     void enabledChanged();
     void opacityChanged();
@@ -120,7 +119,7 @@ signals:
     void rotationChanged();
     void visibleChanged();
     void zValueChanged();
-    void toolTipChanged(const QString& toolTip);
+    void toolTipChanged(const QString &toolTip);
 
     void flagsChanged();
 
@@ -139,31 +138,27 @@ signals:
     */
     void keyFocusRequested();
 
-    
-public slots:
-
 private slots:
     void setConstructed();
 
 private:
-    bool _sizeIsZoomInvariant;
-
-    bool _enabled;
-    qreal _opacity;
-    MapGraphicsObject * _parent;
-    QPointF _pos;
-    qreal _rotation;
-    bool _visible;
-    qreal _zValue;
-    bool _selected;
-
-    QString _toolTip;
+    MapGraphicsObject *_parent = nullptr;
 
     MapGraphicsObject::MapGraphicsObjectFlags _flags;
+    QPointF _pos = QPointF(0.0, 0.0);
+    qreal _rotation = 0.0;
+    qreal _opacity = 1.0;
+    qreal _zValue = 0.0;
+    QString _toolTip;
 
-    bool _constructed;
-    
+    bool _constructed = false;
+    bool _enabled = true;
+    bool _selected = false;
+    bool _visible = true;
+
+    bool _sizeIsZoomInvariant;
 };
+
 Q_DECLARE_OPERATORS_FOR_FLAGS(MapGraphicsObject::MapGraphicsObjectFlags)
 
 #endif // MAPGRAPHICSOBJECT_H

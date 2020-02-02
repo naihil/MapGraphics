@@ -2,8 +2,7 @@
 
 #include <QtDebug>
 
-
-MapGraphicsScene::MapGraphicsScene(QObject * parent)
+MapGraphicsScene::MapGraphicsScene(QObject *parent)
     : QObject(parent)
 {
 }
@@ -16,27 +15,15 @@ MapGraphicsScene::~MapGraphicsScene()
 
 void MapGraphicsScene::addObject(MapGraphicsObject *object)
 {
-    if (object == 0)
+    if (object == nullptr) {
         return;
+    }
 
-    connect(object,
-            SIGNAL(newObjectGenerated(MapGraphicsObject*)),
-            this,
-            SLOT(handleNewObjectGenerated(MapGraphicsObject*)));
-    connect(object,
-            SIGNAL(destroyed(QObject*)),
-            this,
-            SLOT(handleObjectDestroyed(QObject*)));
+    connect(object, &MapGraphicsObject::newObjectGenerated, this, &MapGraphicsScene::handleNewObjectGenerated);
+    connect(object, &MapGraphicsObject::destroyed, this, &MapGraphicsScene::handleObjectDestroyed);
 
     _objects.insert(object);
-    this->objectAdded(object);
-}
-
-QList<MapGraphicsObject *> MapGraphicsScene::objects() const
-{
-    QList<MapGraphicsObject *> toRet;
-
-    return toRet;
+    emit objectAdded(object);
 }
 
 void MapGraphicsScene::removeObject(MapGraphicsObject *object)

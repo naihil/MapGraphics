@@ -23,6 +23,7 @@
 class MAPGRAPHICSSHARED_EXPORT MapGraphicsView : public QWidget, public PrivateQGraphicsInfoSource
 {
     Q_OBJECT
+
 public:
     enum DragMode
     {
@@ -38,24 +39,24 @@ public:
     };
 
 public:
-    explicit MapGraphicsView(MapGraphicsScene * scene=0, QWidget * parent = 0);
-    virtual ~MapGraphicsView();
+    explicit MapGraphicsView(MapGraphicsScene *scene = nullptr, QWidget *parent = nullptr);
+    ~MapGraphicsView() override;
 
     QPointF center() const;
-    void centerOn(const QPointF& pos);
+    void centerOn(const QPointF &pos);
     void centerOn(qreal longitude, qreal latitude);
-    void centerOn(const MapGraphicsObject * item);
+    void centerOn(const MapGraphicsObject *item);
 
-    QPointF mapToScene(const QPoint viewPos) const;
+    QPointF mapToScene(const QPoint &viewPos) const;
 
-    MapGraphicsView::DragMode dragMode() const;
+    MapGraphicsView::DragMode dragMode() const { return _dragMode; }
     void setDragMode(MapGraphicsView::DragMode);
 
-    MapGraphicsScene * scene() const;
+    MapGraphicsScene *scene() const { return _scene; }
     void setScene(MapGraphicsScene *);
 
     //pure-virtual from PrivateQGraphicsInfoSource
-    QSharedPointer<MapTileSource> tileSource() const;
+    QSharedPointer<MapTileSource> tileSource() const override { return _tileSource; }
 
     /**
      * @brief Sets the tile source that this view will pull from.
@@ -66,7 +67,7 @@ public:
     void setTileSource(QSharedPointer<MapTileSource> tSource);
 
     //pure-virtual from PrivateQGraphicsInfoSource
-    quint8 zoomLevel() const;
+    quint8 zoomLevel() const override { return _zoomLevel; }
     void setZoomLevel(quint8 nZoom, ZoomMode zMode = CenterZoom);
 
     void zoomIn(ZoomMode zMode = CenterZoom);
@@ -74,23 +75,21 @@ public:
     
 signals:
     void zoomLevelChanged(quint8 nZoom);
-    
-public slots:
 
 protected slots:
-    virtual void handleChildMouseDoubleClick(QMouseEvent * event);
-    virtual void handleChildMouseMove(QMouseEvent * event);
-    virtual void handleChildMousePress(QMouseEvent * event);
-    virtual void handleChildMouseRelease(QMouseEvent * event);
-    virtual void handleChildViewContextMenu(QContextMenuEvent * event);
-    virtual void handleChildViewScrollWheel(QWheelEvent * event);
-
-private slots:
-    void renderTiles();
+    virtual void handleChildMouseDoubleClick(QMouseEvent *event);
+    virtual void handleChildMouseMove(QMouseEvent *event);
+    virtual void handleChildMousePress(QMouseEvent *event);
+    virtual void handleChildMouseRelease(QMouseEvent *event);
+    virtual void handleChildViewContextMenu(QContextMenuEvent *event);
+    virtual void handleChildViewScrollWheel(QWheelEvent *event);
 
 protected:
     void doTileLayout();
     void resetQGSSceneSize();
+
+private slots:
+    void renderTiles();
 
 private:
     QPointer<MapGraphicsScene> _scene;
@@ -100,7 +99,7 @@ private:
 
     QSet<MapTileGraphicsObject *> _tileObjects;
 
-    quint8 _zoomLevel;
+    quint8 _zoomLevel = 2;
 
     DragMode _dragMode;
 };

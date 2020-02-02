@@ -11,49 +11,46 @@
 class MAPGRAPHICSSHARED_EXPORT MapGraphicsScene : public QObject
 {
     Q_OBJECT
+
 public:
-    MapGraphicsScene(QObject * parent = 0);
-    virtual ~MapGraphicsScene();
+    explicit MapGraphicsScene(QObject *parent = nullptr);
+    ~MapGraphicsScene() override;
 
     /**
      * @brief Adds or re-parents the given MapGraphicsObject to this scene.
      *
-     * @param item
+     * @param object Added object
      */
-    void addObject(MapGraphicsObject * object);
+    void addObject(MapGraphicsObject *object);
 
     /**
-     * @brief Returns a list of pointers to all MapGraphicsObject objects in the scene
+     * @brief Removes the given MapGraphicsObject from scene.
      *
-     * @return QList<MapGraphicsObject *>
+     * @param object Object that needs to be removed
      */
-    QList<MapGraphicsObject *> objects() const;
-
-    void removeObject(MapGraphicsObject * object);
+    void removeObject(MapGraphicsObject *object);
 
 signals:
     /**
      * @brief Fired when a MapGraphicsObject is added to the scene
      *
-     * @param the object that was added
+     * @param object The object that was added
      */
-    void objectAdded(MapGraphicsObject *);
+    void objectAdded(MapGraphicsObject *object);
 
     /**
      * @brief Fired when a MapGraphicsObject is removed from the scene.
      *
-     * @param the object that was removed
+     * @param object The object that was removed
      */
-    void objectRemoved(MapGraphicsObject *);
+    void objectRemoved(MapGraphicsObject *object);
 
 private slots:
-    void handleNewObjectGenerated(MapGraphicsObject * newObject);
-    void handleObjectDestroyed(QObject * object);
+    void handleNewObjectGenerated(MapGraphicsObject *newObject);
+    void handleObjectDestroyed(QObject *object);
 
 private:
     QSet<MapGraphicsObject *> _objects;
-
-
 };
 
 #endif // MAPGRAPHICSSCENE_H

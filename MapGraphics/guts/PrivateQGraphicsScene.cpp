@@ -5,39 +5,38 @@
 
 #include "MapGraphicsScene.h"
 
-PrivateQGraphicsScene::PrivateQGraphicsScene(MapGraphicsScene * mgScene,
-                                             PrivateQGraphicsInfoSource *infoSource,
-                                             QObject *parent) :
-    QGraphicsScene(parent), _infoSource(infoSource)
+PrivateQGraphicsScene::PrivateQGraphicsScene(MapGraphicsScene * mgScene, PrivateQGraphicsInfoSource *infoSource, QObject *parent)
+    : QGraphicsScene(parent)
+    , _infoSource(infoSource)
 {
     this->setMapGraphicsScene(mgScene);
 
-    connect(this,
-            SIGNAL(selectionChanged()),
-            this,
-            SLOT(handleSelectionChanged()));
+    connect(this, &PrivateQGraphicsScene::selectionChanged, this, &PrivateQGraphicsScene::handleSelectionChanged);
+}
+
+PrivateQGraphicsScene::~PrivateQGraphicsScene()
+{
 }
 
 //private slot
-void PrivateQGraphicsScene::handleMGObjectAdded(MapGraphicsObject * added)
+void PrivateQGraphicsScene::handleMGObjectAdded(MapGraphicsObject *added)
 {
-    PrivateQGraphicsObject * qgObj = new PrivateQGraphicsObject(added,_infoSource);
+    PrivateQGraphicsObject *qgObj = new PrivateQGraphicsObject(added, _infoSource);
     this->addItem(qgObj);
 
     //We need a mapping of MapGraphicsObject : QGraphicsObject, so put this in the map
-    _mgToqg.insert(added,qgObj);
+    _mgToqg.insert(added, qgObj);
 }
 
 //private slot
-void PrivateQGraphicsScene::handleMGObjectRemoved(MapGraphicsObject * removed)
+void PrivateQGraphicsScene::handleMGObjectRemoved(MapGraphicsObject *removed)
 {
-    if (!_mgToqg.contains(removed))
-    {
+    if (!_mgToqg.contains(removed)) {
         qWarning() << "There is no QGraphicsObject in the scene for" << removed;
         return;
     }
 
-    QGraphicsObject * qgObj = _mgToqg.take(removed);
+    QGraphicsObject *qgObj = _mgToqg.take(removed);
     delete qgObj;
 
     /*
@@ -58,31 +57,32 @@ void PrivateQGraphicsScene::handleMGObjectRemoved(MapGraphicsObject * removed)
 
 void PrivateQGraphicsScene::handleZoomLevelChanged()
 {
-    foreach(PrivateQGraphicsObject * obj, _mgToqg.values())
+    foreach(PrivateQGraphicsObject * obj, _mgToqg.values()) {
         obj->handleZoomLevelChanged();
+    }
 }
 
 void PrivateQGraphicsScene::handleSelectionChanged()
 {
     QList<QGraphicsItem *> selectedList = this->selectedItems();
     QSet<QGraphicsItem *> selected;
-    foreach(QGraphicsItem * item, selectedList)
+    foreach(QGraphicsItem * item, selectedList) {
         selected.insert(item);
+    }
 
     QList<QGraphicsItem *> newSelections;
-    foreach(PrivateQGraphicsObject * obj, _mgToqg.values())
-    {
-        QGraphicsItem * casted = (QGraphicsItem *) obj;
+    foreach(PrivateQGraphicsObject * obj, _mgToqg.values()) {
+        QGraphicsItem *casted = (QGraphicsItem *) obj;
 
         bool doSelect = selected.contains(casted) && !_oldSelections.contains(obj);
         obj->setSelected(doSelect);
 
-        if (doSelect)
+        if (doSelect) {
             newSelections.append(obj);
+        }
     }
 
     _oldSelections = newSelections;
-
 }
 
 //private
@@ -90,19 +90,11 @@ void PrivateQGraphicsScene::setMapGraphicsScene(MapGraphicsScene *mgScene)
 {
     _mgScene = mgScene;
 
-    if (_mgScene.isNull())
-    {
+    if (_mgScene.isNull()) {
         qWarning() << this << "got a null MapGraphicsScene";
         return;
     }
 
-    connect(_mgScene.data(),
-            SIGNAL(objectAdded(MapGraphicsObject*)),
-            this,
-            SLOT(handleMGObjectAdded(MapGraphicsObject*)));
-    connect(_mgScene.data(),
-            SIGNAL(objectRemoved(MapGraphicsObject*)),
-            this,
-            SLOT(handleMGObjectRemoved(MapGraphicsObject*)));
-
+    connect(_mgScene.data(), &MapGraphicsScene::objectAdded, this, &PrivateQGraphicsScene::handleMGObjectAdded);
+    connect(_mgScene.data(), &MapGraphicsScene::objectRemoved, this, &PrivateQGraphicsScene::handleMGObjectRemoved);
 }
